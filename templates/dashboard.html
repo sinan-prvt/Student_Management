@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Welcome Section -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Welcome back, <span class="text-primary">{{ student.user.first_name|default:student.user.username }}</span> 👋</h1>
+        <p class="lead text-muted">Keep learning and growing every day. 🚀</p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row g-4 mb-5 text-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Courses</h6>
+                    <h2 class="card-title text-primary">{{ enrollments|length }}</h2>
+                    <i class="bi bi-journal-bookmark text-primary fs-2"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Completed Courses</h6>
+                    <h2 class="card-title text-success">{{ completed_courses }}</h2>
+                    <i class="bi bi-check-circle text-success fs-2"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Pending Courses</h6>
+                    <h2 class="card-title text-warning">{{ pending_courses }}</h2>
+                    <i class="bi bi-hourglass-split text-warning fs-2"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Available Courses Section -->
+    <h3 class="fw-bold mb-4">📝 Top Available Courses</h3>
+    <div class="row g-4 mb-5">
+        {% for course in all_courses|slice:":3" %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <p class="mb-2">
+                            <span class="badge bg-info text-dark">{{ course.category }}</span>
+                            <span class="badge bg-secondary">{{ course.level }}</span>
+                            {% for tag in course.tags %}
+                                <span class="badge bg-light text-dark">{{ tag }}</span>
+                            {% endfor %}
+                        </p>
+                        <p class="text-muted small">{{ course.description|truncatewords:20 }}</p>
+                        <div class="mt-auto">
+                            <a href="{% url 'enrollments_page' %}" class="btn btn-primary w-100">Show More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Learning Progress Section -->
+    <h3 class="fw-bold mb-4">📊 Your Learning Progress</h3>
+    <div class="row g-4">
+        {% if enrollments %}
+            {% for e in enrollments %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm border-0 h-100 position-relative">
+                        <!-- Circular Progress -->
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <div class="progress-circle" data-progress="{{ e.progress_percent }}">
+                                <span class="progress-text">{{ e.progress_percent }}%</span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-3">{{ e.course.title }}</h5>
+
+                            <div class="mb-2">
+                                <span class="badge bg-info text-dark me-1">{{ e.course.category }}</span>
+                                <span class="badge bg-secondary me-1">{{ e.course.level }}</span>
+                                {% for tag in e.course.tags %}
+                                    <span class="badge bg-light text-dark me-1">{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mb-3">
+                                {% if e.progress_percent == 100 %}
+                                    <span class="badge bg-success fs-6">✅ Completed</span>
+                                {% elif e.progress_percent == 0 %}
+                                    <span class="badge bg-secondary fs-6">Not Started</span>
+                                {% else %}
+                                    <span class="badge bg-warning fs-6">In Progress</span>
+                                {% endif %}
+                            </div>
+
+                            <a href="{% url 'course_detail' e.course.id %}" class="btn btn-outline-primary mt-auto w-100">
+                                {% if e.progress_percent == 0 %}Start{% else %}Continue{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">You haven't enrolled in any courses yet. Start learning today! 🎯</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.progress-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #28a745 calc(var(--progress) * 1%), 
+        #e9ecef 0
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #343a40;
+}
+.progress-text {
+    font-size: 0.8rem;
+    text-align: center;
+}
+.card:hover {
+    transform: scale(1.02);
+    transition: 0.3s;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const circles = document.querySelectorAll('.progress-circle');
+    circles.forEach(circle => {
+        const progress = circle.getAttribute('data-progress');
+        circle.style.setProperty('--progress', progress);
+    });
+});
+</script>
+{% endblock %}

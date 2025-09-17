@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Lesson - {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Lesson Header -->
+    <div class="mb-4 text-center">
+        <h2 class="fw-bold">{{ lesson.title }}</h2>
+        <p class="text-muted">Part of: <span class="fw-semibold">{{ lesson.course.title }}</span></p>
+    </div>
+
+    <!-- Lesson Content -->
+    <div class="mb-5">
+        {% if lesson.lesson_type == "Video" %}
+            <div class="ratio ratio-16x9 shadow-sm rounded">
+                {% if "youtube.com/watch" in lesson.content_url %}
+                    <iframe src="{{ lesson.content_url|cut:'watch?v='|add:'embed/' }}"
+                            title="{{ lesson.title }}"
+                            allowfullscreen
+                            class="rounded"></iframe>
+                {% else %}
+                    <iframe src="{{ lesson.content_url }}"
+                            title="{{ lesson.title }}"
+                            allowfullscreen
+                            class="rounded"></iframe>
+                {% endif %}
+            </div>
+        {% elif lesson.lesson_type == "PDF" %}
+            {% if lesson.content_url %}
+                <iframe src="{{ lesson.content_url }}" width="100%" height="600px" class="shadow-sm rounded"></iframe>
+            {% else %}
+                <p class="text-muted">📄 No PDF file uploaded for this lesson yet.</p>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">⚠️ No content available for this lesson.</p>
+        {% endif %}
+    </div>
+
+    <!-- Mark as Complete Box -->
+    <div class="d-flex justify-content-center mb-5">
+        {% if lesson in completed_lessons %}
+            <!-- Completed State -->
+            <div class="card text-center shadow-lg border-success bg-success text-white w-50">
+                <div class="card-body py-4">
+                    <h4 class="card-title mb-2">🎉 Lesson Completed!</h4>
+                    <p class="card-text">You’ve successfully finished this lesson.</p>
+                    <i class="bi bi-check-circle-fill display-4"></i>
+                </div>
+            </div>
+        {% else %}
+            <!-- Mark as Complete Form -->
+            <form action="{% url 'complete_lesson' course_id=lesson.course.id lesson_id=lesson.id %}" method="post" class="w-50">
+                {% csrf_token %}
+                <button type="submit" class="w-100 border-0 p-0 bg-transparent">
+                    <div class="card text-center shadow-lg border-primary hover-card">
+                        <div class="card-body py-4">
+                            <h4 class="card-title mb-2 text-primary">📦 Mark Lesson as Complete</h4>
+                            <p class="card-text text-muted mb-0">Click to finish and return to the lessons list</p>
+                        </div>
+                    </div>
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mb-5">
+        <a href="{% url 'course_detail' lesson.course.id %}" class="btn btn-outline-secondary btn-lg">
+            ← Back to Course Lessons
+        </a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Card Hover Animation */
+.hover-card {
+    transition: all 0.3s ease-in-out;
+}
+.hover-card:hover {
+    background-color: #e0f7fa;
+    transform: scale(1.03);
+}
+
+/* Completed Card Icon Styling */
+.card i {
+    color: #fff;
+    margin-top: 10px;
+}
+
+/* Smooth Shadow */
+.card {
+    border-radius: 12px;
+}
+
+/* Responsive Button */
+@media (max-width: 768px) {
+    .w-50 {
+        width: 90% !important;
+    }
+}
+</style>
+{% endblock %}

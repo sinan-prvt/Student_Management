@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Enroll in Courses{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h1 class="fw-bold">📝 All Courses</h1>
+            <p class="text-muted">See all courses and enroll in what you like!</p>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="row g-4">
+        {% if all_courses %}
+            {% for course in all_courses %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0 {% if course.id in enrolled_courses_ids %}border-success{% endif %}">
+                        {% if course.image %}
+                            <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="{{ course.title }}">
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ course.title }}</h5>
+                            <p class="mb-2">
+                                <span class="badge bg-info text-dark">{{ course.category }}</span>
+                                <span class="badge bg-secondary">{{ course.level }}</span>
+                                {% for tag in course.tags %}
+                                    <span class="badge bg-light text-dark">{{ tag }}</span>
+                                {% endfor %}
+                            </p>
+                            <p class="text-muted small">{{ course.description|truncatewords:25 }}</p>
+
+                            <div class="mt-auto">
+                                {% if course.id in enrolled_courses_ids %}
+                                    <button class="btn btn-outline-success w-100" disabled>Enrolled</button>
+                                {% else %}
+                                    <form action="{% url 'enroll_course' course.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary w-100">Enroll Now</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No courses available at the moment. 🎉</p>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mt-3">Back to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card:hover {
+    transform: scale(1.02);
+    transition: 0.3s;
+}
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+}
+</style>
+{% endblock %}

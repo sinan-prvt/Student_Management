@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold">{{ course.title }}</h2>
+    <p class="text-muted">{{ course.description }}</p>
+
+    <div class="mt-4">
+        <h4>Lessons in this Course</h4>
+        <ul class="list-group">
+            {% for lesson in lessons %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ lesson.title }}
+                    <a href="{% url 'lesson_detail' course.id lesson.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">No lessons added yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
