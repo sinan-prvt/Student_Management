@@ -2,7 +2,7 @@
 {% block title %}My Courses{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-10 ">
     <div class="row mb-4">
         <div class="col">
             <h1 class="fw-bold">My Courses</h1>
@@ -13,9 +13,9 @@
     {% if enrollments %}
         <div class="row g-4">
             {% for enrollment in enrollments %}
-                <div class="col-md-6 col-lg-4">
-                    <div class="card shadow-sm h-100 border-0">                
-                        <div class="card-body">
+                <div class="col-md-6 col-lg-4 d-flex">
+                    <div class="card shadow-sm border-0 flex-fill d-flex flex-column">
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title">{{ enrollment.course.title }}</h5>
                             <p class="mb-2">
                                 <span class="badge bg-info text-dark">{{ enrollment.course.category }}</span>
@@ -26,7 +26,6 @@
                             </p>
                             <p class="text-muted small">{{ enrollment.course.description|truncatechars:100 }}</p>
 
-                            <!-- Progress -->
                             <p class="mb-2 text-muted small">Progress</p>
                             <div class="progress" style="height: 20px;">
                                 <div class="progress-bar 
@@ -34,7 +33,7 @@
                                     {% elif enrollment.progress_percent >= 50 %}bg-info
                                     {% else %}bg-warning
                                     {% endif %}" 
-                                    role="progressbar" 
+                                    role="progressbar"
                                     style="width: {{ enrollment.progress_percent }}%;" 
                                     aria-valuenow="{{ enrollment.progress_percent }}" 
                                     aria-valuemin="0" aria-valuemax="100">
@@ -42,7 +41,11 @@
                                 </div>
                             </div>
 
-                            <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-outline-primary btn-sm mt-3 w-100">View Course</a>
+                            <br>
+                            <a href="{% url 'course_detail' enrollment.course.id %}" 
+                               class="btn btn-outline-primary btn-sm mt-auto w-100">
+                                View Course
+                            </a>
                         </div>
                     </div>
                 </div>
