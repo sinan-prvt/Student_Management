@@ -1,16 +1,43 @@
 {% extends 'base.html' %}
+{% load custom_filters %}  {# Needed for split filter #}
+
 {% block title %}Enroll in Courses{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
 
+    <!-- Search & Filter Form -->
     <div class="row mb-4">
-        <div class="col text-center">
-            <h1 class="fw-bold">All Courses</h1>
-            <p class="text-muted">See all courses and enroll in what you like!</p>
+        <div class="col">
+            <form method="get" class="row g-2">
+                <div class="col-md-2">
+                    <input type="text" name="title" placeholder="Search courses..." value="{{ request.GET.title }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" name="category" placeholder="Category" value="{{ request.GET.category }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" name="tags" placeholder="Tags" value="{{ request.GET.tags }}" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <select name="level" class="form-select">
+                        <option value="">All Levels</option>
+                        <option value="Beginner" {% if request.GET.level == "Beginner" %}selected{% endif %}>Beginner</option>
+                        <option value="Intermediate" {% if request.GET.level == "Intermediate" %}selected{% endif %}>Intermediate</option>
+                        <option value="Advanced" {% if request.GET.level == "Advanced" %}selected{% endif %}>Advanced</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'enrollments_page' %}" class="btn btn-outline-secondary w-100">Clear</a>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Courses List -->
     <div class="row g-4">
         {% if all_courses %}
             {% for course in all_courses %}
@@ -21,12 +48,15 @@
                             <p class="mb-2">
                                 <span class="badge bg-info text-dark">{{ course.category }}</span>
                                 <span class="badge bg-secondary">{{ course.level }}</span>
-                                {% for tag in course.tags %}
-                                    <span class="badge bg-light text-dark">{{ tag }}</span>
-                                {% endfor %}
+
+                                {# Simplified tags loop #}
+                                {% if course.tags %}
+                                    {% for tag in course.tags|split:"," %}
+                                        <span class="badge bg-light text-dark">{{ tag }}</span>
+                                    {% endfor %}
+                                {% endif %}
                             </p>
                             <p class="text-muted small">{{ course.description|truncatewords:25 }}</p>
-
                             <div class="mt-auto">
                                 {% if course.id in enrolled_courses_ids %}
                                     <form action="{% url 'unenroll_course' course.id %}" method="post">
@@ -46,11 +76,38 @@
             {% endfor %}
         {% else %}
             <div class="col-12 text-center">
-                <p class="text-muted">No courses available at the moment. </p>
+                <p class="text-muted">No courses found.</p>
                 <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mt-3">Back to Dashboard</a>
             </div>
         {% endif %}
     </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.level %}level={{ request.GET.level }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.level %}level={{ request.GET.level }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.level %}level={{ request.GET.level }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
 
 </div>
 {% endblock %}
@@ -64,6 +121,10 @@
 .card-img-top {
     height: 180px;
     object-fit: cover;
+}
+.badge {
+    margin-right: 3px;
+    margin-bottom: 2px;
 }
 </style>
 {% endblock %}

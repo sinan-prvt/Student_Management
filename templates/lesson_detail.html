@@ -1,101 +1,98 @@
-{% extends 'base.html' %}
-{% load embed_video_tags %}
+{% extends "base.html" %}
+{% load embed_content %}
 
-{% block title %}Lesson - {{ lesson.title }}{% endblock %}
+{% block title %}{{ lesson.title }} | {{ lesson.course.title }}{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container my-5">
 
-    <div class="mb-4 text-center">
+    <!-- Lesson Header -->
+    <div class="mb-4">
         <h2 class="fw-bold">{{ lesson.title }}</h2>
-        <p class="text-muted">Part of: <span class="fw-semibold">{{ lesson.course.title }}</span></p>
+        <p class="text-muted">Part of: <strong>{{ lesson.course.title }}</strong></p>
     </div>
 
-    <div class="mb-5">
+    <!-- Tabs for Video / PDF -->
+    {% if lesson.video_url or lesson.file %}
+    <ul class="nav nav-tabs mb-3" id="lessonTab" role="tablist">
+        {% if lesson.video_url %}
+            <li class="nav-item">
+                <a class="nav-link active" id="video-tab" data-bs-toggle="tab" href="#video" role="tab">
+                    🎬 Video
+                </a>
+            </li>
+        {% endif %}
+        {% if lesson.file %}
+            <li class="nav-item">
+                <a class="nav-link {% if not lesson.video_url %}active{% endif %}" id="pdf-tab" data-bs-toggle="tab" href="#pdf" role="tab">
+                    📄 PDF
+                </a>
+            </li>
+        {% endif %}
+    </ul>
 
-        {% if lesson.lesson_type == "Video" %}
-            {% if lesson.video_url %}
-                <div class="ratio ratio-16x9 shadow-sm rounded mb-2">
-                    {% video lesson.video_url "large" %}
+    <div class="tab-content">
+        {% if lesson.video_url %}
+        <div class="tab-pane fade show active" id="video" role="tabpanel">
+            <div class="mb-3">
+                <!-- YouTube embed -->
+                <div class="ratio ratio-16x9 shadow-sm rounded">
+                    <iframe width="800" height="450"
+                            src="{{ lesson.video_url|youtube_embed }}"
+                            title="Lesson Video"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                    </iframe>
                 </div>
-            {% else %}
-                <p class="text-center text-warning">
-                    No video available for this lesson. 
-                </p>
-            {% endif %}
 
-        {% elif lesson.lesson_type == "PDF" %}
-            {% if lesson.file %}
-                <iframe src="{{ lesson.file.url }}" width="100%" height="600px" class="shadow-sm rounded mb-2"></iframe>
-                <p class="text-center mt-2">
-                    <a href="{{ lesson.file.url }}" target="_blank">Open PDF Externally</a>
+                <!-- Fallback link -->
+                <p class="mt-2 text-center">
+                    <a href="{{ lesson.video_url }}" target="_blank" class="btn btn-outline-danger btn-sm">
+                        ▶ Watch on YouTube
+                    </a>
                 </p>
-            {% else %}
-                <p class="text-muted">No PDF file uploaded for this lesson yet.</p>
-            {% endif %}
-
-        {% else %}
-            <p class="text-muted">No content available for this lesson.</p>
+            </div>
+        </div>
         {% endif %}
 
+        {% if lesson.file %}
+        <div class="tab-pane fade {% if not lesson.video_url %}show active{% endif %}" id="pdf" role="tabpanel">
+            <div class="mb-3">
+                {% embed_pdf lesson.file.url 800 600 %}
+            </div>
+            <a href="{{ lesson.file.url }}" target="_blank" class="btn btn-outline-info btn-sm">
+                📥 Open PDF Externally
+            </a>
+        </div>
+        {% endif %}
     </div>
+    {% else %}
+        <p class="text-muted">No content available for this lesson.</p>
+    {% endif %}
 
-    <div class="d-flex justify-content-center mb-5">
+    <!-- Lesson Completion -->
+    <div class="mt-4">
         {% if lesson in completed_lessons %}
-            <div class="card text-center shadow-lg border-success bg-success text-white w-50">
-                <div class="card-body py-4">
-                    <h4 class="card-title mb-2">Lesson Completed!</h4>
-                    <p class="card-text">You’ve successfully finished this lesson.</p>
-                    <i class="bi bi-check-circle-fill display-4"></i>
-                </div>
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                ✅ You have completed this lesson.
             </div>
         {% else %}
-            <form action="{% url 'complete_lesson' course_id=lesson.course.id lesson_id=lesson.id %}" method="post" class="w-50">
+            <form action="{% url 'complete_lesson' course_id=lesson.course.id lesson_id=lesson.id %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="w-100 border-0 p-0 bg-transparent">
-                    <div class="card text-center shadow-lg border-primary hover-card">
-                        <div class="card-body py-4">
-                            <h4 class="card-title mb-2 text-primary">Mark Lesson as Complete</h4>
-                            <p class="card-text text-muted mb-0">Click to finish and return to the lessons list</p>
-                        </div>
-                    </div>
+                <button type="submit" class="btn btn-outline-primary">
+                    Mark as Completed
                 </button>
             </form>
         {% endif %}
     </div>
 
-    <div class="text-center mb-5">
-        <a href="{% url 'course_detail' lesson.course.id %}" class="btn btn-outline-secondary btn-lg">
-            ← Back to Course Lessons
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="{% url 'course_detail' lesson.course.id %}" class="btn btn-outline-secondary">
+            ⬅ Back to Course Lessons
         </a>
     </div>
 
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.hover-card {
-    transition: all 0.3s ease-in-out;
-}
-.hover-card:hover {
-    background-color: #e0f7fa;
-    transform: scale(1.03);
-}
-
-.card i {
-    color: #fff;
-    margin-top: 10px;
-}
-
-.card {
-    border-radius: 12px;
-}
-
-@media (max-width: 768px) {
-    .w-50 {
-        width: 90% !important;
-    }
-}
-</style>
 {% endblock %}

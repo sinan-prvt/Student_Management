@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from embed_video.fields import EmbedVideoField
+# from embed_video.fields import EmbedVideoField
 
 
 class Student(models.Model):
@@ -23,8 +23,8 @@ class Course(models.Model):
     description = models.TextField()
     category = models.CharField(max_length=100)
     level = models.CharField(max_length=20, choices=LEVEL_CHOICES)
-    tags = models.JSONField(default=list)  
-
+    tags = models.CharField(max_length=200, blank=True, help_text="Comma separated tags, e.g., Python,Django,Frontend")
+    
     def __str__(self):
         return self.title
     
@@ -36,8 +36,10 @@ class Lesson(models.Model):
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="lessons")
     title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
     lesson_type = models.CharField(max_length=10, choices=LESSON_TYPES)
-    video_url = EmbedVideoField(blank=True, null=True)  
+    video_url = models.URLField(blank=True, null=True, help_text="YouTube or Vimeo link")
+    pdf_file = models.FileField(upload_to='lessons/pdfs/', blank=True, null=True)
     file = models.FileField(upload_to="lessons/", blank=True, null=True)  
     order = models.PositiveIntegerField(default=0)
     

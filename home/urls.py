@@ -24,7 +24,4 @@ urlpatterns = [
     path('enroll_course/<int:course_id>/', views.enroll_course, name='enroll_course'),
     path("courses/<int:course_id>/unenroll/", views.unenroll_course, name="unenroll_course"),
 
-] 
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

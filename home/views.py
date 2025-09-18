@@ -7,48 +7,73 @@ from .models import Student, Enrollment, Course, Lesson
 from django.contrib.auth.models import User
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
-import re
-from django import template
+# import re
+# from django import template
+from .filters import CourseFilter
+from django.core.paginator import Paginator
+from django.core.mail import send_mail
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.utils.encoding import force_str  # Add at top
+
 
 # -------------------------
 # Student Signup
 # -------------------------
+
 def student_signup(request):
     if request.method == 'POST':
         form = StudentSignupForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = True
+            user.is_active = False  # Keep inactive until email verification
             user.save()
 
             # Create Student profile automatically
-            Student.objects.create(user=user)
+            # Student.objects.create(user=user)
 
-            # Auto-login
-            auth_login(request, user)
-            messages.success(request, "🎉 Welcome! Your account has been created successfully.")
-            return redirect('dashboard')
+            # --- Send verification email ---
+            current_site = get_current_site(request)
+            subject = "Verify your email for Academic Portal"
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            verification_link = f"http://{current_site.domain}/verify/{uid}/{token}/"
+            
+            message = render_to_string('email_verification.html', {
+                'user': user,
+                'verification_link': verification_link
+            })
+
+            send_mail(
+                subject,
+                message,
+                'no-reply@yourdomain.com',
+                [user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, "🎉 Account created! Please check your email to verify your account.")
+            return redirect('login')
         else:
             messages.error(request, "⚠️ Please correct the errors below.")
     else:
         form = StudentSignupForm()
     return render(request, 'signup.html', {'form': form})
 
-
 # -------------------------
 # Email Verification
 # -------------------------
 def verify_email(request, uidb64, token):
     try:
-        uid = urlsafe_base64_decode(uidb64).decode()
+        uid = force_str(urlsafe_base64_decode(uidb64))
         user = get_object_or_404(User, pk=uid)
-    except:
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
-    if user and default_token_generator.check_token(user, token):
+    if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
         messages.success(request, "✅ Email verified successfully! You can now login.")
@@ -56,7 +81,6 @@ def verify_email(request, uidb64, token):
     else:
         messages.error(request, "❌ Invalid or expired verification link.")
         return redirect('signup')
-
 
 # -------------------------
 # Student Login
@@ -137,20 +161,33 @@ def user_dashboard(request):
 # -------------------------
 # Enrollments Page
 # -------------------------
+
 @login_required
 def enrollments_page(request):
     student = get_object_or_404(Student, user=request.user)
-    all_courses = Course.objects.all()
+    all_courses_qs = Course.objects.all()
+
+    # Filtering
+    course_filter = CourseFilter(request.GET, queryset=all_courses_qs)
+    filtered_courses = course_filter.qs
+
+    # Pagination
+    paginator = Paginator(filtered_courses, 6)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Enrolled courses
     enrollments = Enrollment.objects.filter(student=student)
     enrolled_courses_ids = enrollments.values_list('course_id', flat=True)
 
     context = {
         'student': student,
-        'all_courses': all_courses,
+        'filter': course_filter,
+        'all_courses': page_obj,          # This fixes your template
+        'page_obj': page_obj,
         'enrolled_courses_ids': enrolled_courses_ids,
     }
     return render(request, 'enrollment.html', context)
-
 
 @login_required
 def enroll_course(request, course_id):
@@ -293,14 +330,14 @@ def complete_lesson(request, course_id, lesson_id):
         return redirect("course_detail", course_id=course_id)
 
 
-# -------------------------
-# Custom YouTube Embed Filter
-# -------------------------
-register = template.Library()
+# # -------------------------
+# # # Custom YouTube Embed Filter
+# # -------------------------
+# register = template.Library()
 
-@register.filter
-def youtube_embed(url):
-    match = re.search(r'(?:v=|youtu\.be/|v=)([\w-]{11})', url)
-    if match:
-        return f'https://www.youtube.com/embed/{match.group(1)}'
-    return url
+# @register.filter
+# def youtube_embed(url):
+#     match = re.search(r'(?:v=|youtu\.be/|v=)([\w-]{11})', url)
+#     if match:
+#         return f'https://www.youtube.com/embed/{match.group(1)}'
+#     return url
