@@ -1,37 +1,33 @@
+# templatetags/embed_content.py
 from django import template
-import re
 from django.utils.safestring import mark_safe
+import re
 
 register = template.Library()
 
 @register.filter
 def youtube_embed(url):
-    if not url:
-        return ""
-    if "youtu.be" in url:
-        video_id = url.split("/")[-1]
-    elif "youtube.com/watch?v=" in url:
-        video_id = url.split("v=")[-1].split("&")[0]
+    """
+    Convert YouTube URL into embeddable iframe.
+    Supports:
+    - https://www.youtube.com/watch?v=VIDEO_ID
+    - https://youtu.be/VIDEO_ID
+    """
+    video_id = None
+
+    # long URL
+    match = re.search(r'v=([a-zA-Z0-9_-]{11})', url)
+    if match:
+        video_id = match.group(1)
     else:
-        return url  # fallback to original URL
-    return f"https://www.youtube.com/embed/{video_id}"
+        # short URL
+        match = re.search(r'youtu\.be/([a-zA-Z0-9_-]{11})', url)
+        if match:
+            video_id = match.group(1)
 
+    if video_id:
+        embed_code = f'<iframe width="100%" height="500" src="https://www.youtube.com/embed/{video_id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>'
+        return mark_safe(embed_code)
 
-@register.simple_tag
-def embed_pdf(url, width=800, height=600):
-    """
-    Embeds a PDF file in a responsive iframe.
-    Usage: {% embed_pdf lesson.file.url 800 600 %}
-    """
-    if not url:
-        return "No PDF available."
+    return mark_safe('<p>Invalid YouTube URL</p>')
 
-    html = f"""
-    <div class="ratio ratio-4x3" style="max-width:{width}px; margin:auto;">
-        <iframe src="{url}" width="{width}" height="{height}" style="border:1px solid #ccc;">
-            This browser does not support PDFs. Please download the PDF to view it: 
-            <a href="{url}" target="_blank">Download PDF</a>
-        </iframe>
-    </div>
-    """
-    return mark_safe(html)

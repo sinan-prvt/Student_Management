@@ -1,98 +1,70 @@
 {% extends "base.html" %}
-{% load embed_content %}
+{% load embed_content %}  {# Make sure video_filters.py exists in templatetags #}
 
-{% block title %}{{ lesson.title }} | {{ lesson.course.title }}{% endblock %}
+{% block title %}{{ course.title }} - {{ lesson.title }}{% endblock %}
 
 {% block content %}
 <div class="container my-5">
 
     <!-- Lesson Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">{{ course.title }} - {{ lesson.title }}</h2>
+        <a href="{% url 'course' %}" class="btn btn-outline-primary btn-sm">⬅ Back</a>
+    </div>
+
+    <!-- Lesson Video -->
     <div class="mb-4">
-        <h2 class="fw-bold">{{ lesson.title }}</h2>
-        <p class="text-muted">Part of: <strong>{{ lesson.course.title }}</strong></p>
-    </div>
-
-    <!-- Tabs for Video / PDF -->
-    {% if lesson.video_url or lesson.file %}
-    <ul class="nav nav-tabs mb-3" id="lessonTab" role="tablist">
         {% if lesson.video_url %}
-            <li class="nav-item">
-                <a class="nav-link active" id="video-tab" data-bs-toggle="tab" href="#video" role="tab">
-                    🎬 Video
-                </a>
-            </li>
-        {% endif %}
-        {% if lesson.file %}
-            <li class="nav-item">
-                <a class="nav-link {% if not lesson.video_url %}active{% endif %}" id="pdf-tab" data-bs-toggle="tab" href="#pdf" role="tab">
-                    📄 PDF
-                </a>
-            </li>
-        {% endif %}
-    </ul>
-
-    <div class="tab-content">
-        {% if lesson.video_url %}
-        <div class="tab-pane fade show active" id="video" role="tabpanel">
-            <div class="mb-3">
-                <!-- YouTube embed -->
-                <div class="ratio ratio-16x9 shadow-sm rounded">
-                    <iframe width="800" height="450"
-                            src="{{ lesson.video_url|youtube_embed }}"
-                            title="Lesson Video"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen>
-                    </iframe>
-                </div>
-
-                <!-- Fallback link -->
-                <p class="mt-2 text-center">
-                    <a href="{{ lesson.video_url }}" target="_blank" class="btn btn-outline-danger btn-sm">
-                        ▶ Watch on YouTube
-                    </a>
-                </p>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if lesson.file %}
-        <div class="tab-pane fade {% if not lesson.video_url %}show active{% endif %}" id="pdf" role="tabpanel">
-            <div class="mb-3">
-                {% embed_pdf lesson.file.url 800 600 %}
-            </div>
-            <a href="{{ lesson.file.url }}" target="_blank" class="btn btn-outline-info btn-sm">
-                📥 Open PDF Externally
-            </a>
-        </div>
-        {% endif %}
-    </div>
-    {% else %}
-        <p class="text-muted">No content available for this lesson.</p>
-    {% endif %}
-
-    <!-- Lesson Completion -->
-    <div class="mt-4">
-        {% if lesson in completed_lessons %}
-            <div class="alert alert-success d-flex align-items-center" role="alert">
-                ✅ You have completed this lesson.
-            </div>
+            {{ lesson.video_url|youtube_embed }}
         {% else %}
-            <form action="{% url 'complete_lesson' course_id=lesson.course.id lesson_id=lesson.id %}" method="post">
+            <p class="text-muted">No video available for this lesson.</p>
+        {% endif %}
+    </div>
+
+    <!-- Lesson Description -->
+    <div class="mb-4">
+        <h5>Description:</h5>
+        <p>{{ lesson.description|linebreaks }}</p>
+    </div>
+
+<!-- Lesson PDF -->
+<div class="mb-4">
+    <h5>Lesson PDF:</h5>
+    {% if lesson.pdf %}
+        <a href="{{ lesson.pdf.url }}" class="btn btn-outline-primary" download>
+            📄 Download PDF
+        </a>
+    {% else %}
+        <p class="text-muted">No PDF available for this lesson.</p>
+    {% endif %}
+</div>
+    <!-- Mark as Read Button -->
+    <div class="mb-4">
+        {% if lesson in completed_lessons %}
+            <button class="btn btn-success" disabled>✅ Completed</button>
+        {% else %}
+            <form method="POST" action="{% url 'complete_lesson' course.id lesson.id %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-primary">
-                    Mark as Completed
-                </button>
+                <button type="submit" class="btn btn-primary">Mark as Read</button>
             </form>
         {% endif %}
     </div>
 
-    <!-- Back Button -->
-    <div class="mt-4">
-        <a href="{% url 'course_detail' lesson.course.id %}" class="btn btn-outline-secondary">
-            ⬅ Back to Course Lessons
-        </a>
+    <!-- Navigation -->
+    <div class="d-flex justify-content-between">
+        {% if prev_lesson %}
+            <a href="{% url 'lesson_detail' course.id prev_lesson.id %}" class="btn btn-outline-secondary">&larr; Previous Lesson</a>
+        {% else %}
+            <div></div>
+        {% endif %}
+
+        {% if next_lesson %}
+            <a href="{% url 'lesson_detail' course.id next_lesson.id %}" class="btn btn-outline-secondary">Next Lesson &rarr;</a>
+        {% else %}
+            <div></div>
+        {% endif %}
     </div>
 
 </div>
 {% endblock %}
+    

@@ -38,9 +38,8 @@ class Lesson(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     lesson_type = models.CharField(max_length=10, choices=LESSON_TYPES)
-    video_url = models.URLField(blank=True, null=True, help_text="YouTube or Vimeo link")
-    pdf_file = models.FileField(upload_to='lessons/pdfs/', blank=True, null=True)
-    file = models.FileField(upload_to="lessons/", blank=True, null=True)  
+    video_url = models.URLField(blank=True, null=True)
+    pdf = models.FileField(upload_to="lesson_pdfs/", blank=True, null=True)  
     order = models.PositiveIntegerField(default=0)
     
 

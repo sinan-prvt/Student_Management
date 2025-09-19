@@ -2,8 +2,14 @@ from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
 from . import views
+from django.contrib import admin
+from django.urls import path
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
+    path('admin/logout/', LogoutView.as_view(next_page='/'), name='admin_logout'),
+    path('admin/', admin.site.urls),
+
     path('', views.index, name='index'),
     path('signup/', views.student_signup, name='signup'),
     path('login/', views.student_login, name='login'),
@@ -25,3 +31,4 @@ urlpatterns = [
     path("courses/<int:course_id>/unenroll/", views.unenroll_course, name="unenroll_course"),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
