@@ -18,24 +18,17 @@ from django.template.loader import render_to_string
 from django.utils.encoding import force_str  
 
 
-# -------------------------
-# Student Signup
-# -------------------------
 
 def student_signup(request):
     if request.method == 'POST':
         form = StudentSignupForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False  # Keep inactive until email verification
+            user.is_active = False 
             user.save()
 
-            # Create Student profile automatically
-            # Student.objects.create(user=user)
-
-            # --- Send verification email ---
             current_site = get_current_site(request)
-            subject = "Verify your email for Academic Portal"
+            subject = "Verify your email for Skilloria "
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             verification_link = f"http://{current_site.domain}/verify/{uid}/{token}/"
@@ -53,17 +46,15 @@ def student_signup(request):
                 fail_silently=False,
             )
 
-            messages.success(request, "🎉 Account created! Please check your email to verify your account.")
+            messages.success(request, "Account created! Please check your email to verify your account.")
             return redirect('login')
         else:
-            messages.error(request, "⚠️ Please correct the errors below.")
+            messages.error(request, "Please correct the errors below.")
     else:
         form = StudentSignupForm()
     return render(request, 'signup.html', {'form': form})
 
-# -------------------------
-# Email Verification
-# -------------------------
+
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -74,15 +65,13 @@ def verify_email(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        messages.success(request, "✅ Email verified successfully! You can now login.")
+        messages.success(request, "Email verified successfully! You can now login.")
         return redirect('login')
     else:
-        messages.error(request, "❌ Invalid or expired verification link.")
+        messages.error(request, "Invalid or expired verification link.")
         return redirect('signup')
 
-# -------------------------
-# Student Login
-# -------------------------
+
 def student_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -90,51 +79,77 @@ def student_login(request):
             user = form.get_user()
             auth_login(request, user)
 
-            messages.success(request, f"👋 Welcome back, {user.username}!")
+            messages.success(request, f"Welcome back, {user.username}!")
 
-            # Role-based redirect
-            if user.is_staff:  # Admin user
+            if user.is_staff: 
                 return redirect('/admin/')
-            else:  # Normal student
+            else:
                 return redirect('dashboard')
 
         else:
-            messages.error(request, "⚠️ Invalid username or password.")
+            messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm()
-
     return render(request, 'login.html', {'form': form})
 
 
-# -------------------------
-# Logout
-# -------------------------
 def student_logout(request):
     logout(request)
-    messages.success(request, "👋 Logged out successfully!")
+    messages.success(request, "Logged out successfully!")
     return redirect('index')
 
 
-# -------------------------
-# Home / Index
-# -------------------------
+@login_required
+def user_detail(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+
+    if request.user != student.user:
+        messages.error(request, "You are not allowed to edit this profile.")
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        form = StudentProfileUpdateForm(request.POST, request.FILES, instance=student)
+        if form.is_valid():
+            student = form.save(commit=False)
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.email = form.cleaned_data['email']
+            request.user.save()
+            student.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect("user_detail", pk=student.pk)
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = StudentProfileUpdateForm(instance=student, initial={
+            "first_name": request.user.first_name,
+            "last_name": request.user.last_name,
+            "email": request.user.email,
+        })
+
+    enrollments = student.enrollments.all()
+    return render(request, "user_detail.html", {
+        "student": student,
+        "form": form,
+        "enrollments": enrollments
+    })
+
+
 def index(request):
     return render(request, 'index.html')
 
 
-# -------------------------
-# User Dashboard
-# -------------------------
 @login_required
 def user_dashboard(request):
     try:
         student = request.user.student
     except Student.DoesNotExist:
-        messages.error(request, "⚠️ Your student profile is missing. Please contact admin.")
+        messages.error(request, "Your student profile is missing. Please contact admin.")
         return redirect('index')
     
     enrollments = Enrollment.objects.filter(student=student).select_related('course')
     completed_courses = 0
+
     for e in enrollments:
         total = e.course.lessons.count()
         completed = e.completed_lessons.count()
@@ -156,36 +171,30 @@ def user_dashboard(request):
     })
 
 
-# -------------------------
-# Enrollments Page
-# -------------------------
-
 @login_required
 def enrollments_page(request):
     student = get_object_or_404(Student, user=request.user)
     all_courses_qs = Course.objects.all()
 
-    # Filtering
     course_filter = CourseFilter(request.GET, queryset=all_courses_qs)
     filtered_courses = course_filter.qs
 
-    # Pagination
     paginator = Paginator(filtered_courses, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Enrolled courses
     enrollments = Enrollment.objects.filter(student=student)
     enrolled_courses_ids = enrollments.values_list('course_id', flat=True)
 
     context = {
         'student': student,
         'filter': course_filter,
-        'all_courses': page_obj,          # This fixes your template
+        'all_courses': page_obj,          
         'page_obj': page_obj,
         'enrolled_courses_ids': enrolled_courses_ids,
     }
     return render(request, 'enrollment.html', context)
+
 
 @login_required
 def enroll_course(request, course_id):
@@ -195,13 +204,14 @@ def enroll_course(request, course_id):
     enrollment, created = Enrollment.objects.get_or_create(student=student, course=course)
     
     if created:
-        messages.success(request, f"🎉 You have successfully enrolled in '{course.title}'!")
+        messages.success(request, f"You have successfully enrolled in '{course.title}'!")
     else:
-        messages.info(request, f"ℹ️ You are already enrolled in '{course.title}'.")
+        messages.info(request, f"You are already enrolled in '{course.title}'.")
     
     return redirect('enrollments_page')
 
 
+@login_required
 def unenroll_course(request, course_id):
     if request.method == "POST" and request.user.is_authenticated:
         course = get_object_or_404(Course, id=course_id)
@@ -209,47 +219,7 @@ def unenroll_course(request, course_id):
     return redirect("enrollments_page") 
 
 
-# -------------------------
-# User Profile / Update
-# -------------------------
-@login_required
-def user_detail(request, pk):
-    student = get_object_or_404(Student, pk=pk)
-    if request.user != student.user:
-        messages.error(request, "⚠️ You are not allowed to edit this profile.")
-        return redirect("dashboard")
 
-    if request.method == "POST":
-        form = StudentProfileUpdateForm(request.POST, request.FILES, instance=student)
-        if form.is_valid():
-            student = form.save(commit=False)
-            request.user.first_name = form.cleaned_data['first_name']
-            request.user.last_name = form.cleaned_data['last_name']
-            request.user.email = form.cleaned_data['email']
-            request.user.save()
-            student.save()
-            messages.success(request, "✅ Profile updated successfully!")
-            return redirect("user_detail", pk=student.pk)
-        else:
-            messages.error(request, "⚠️ Please correct the errors below.")
-    else:
-        form = StudentProfileUpdateForm(instance=student, initial={
-            "first_name": request.user.first_name,
-            "last_name": request.user.last_name,
-            "email": request.user.email,
-        })
-
-    enrollments = student.enrollments.all()
-    return render(request, "user_detail.html", {
-        "student": student,
-        "form": form,
-        "enrollments": enrollments
-    })
-
-
-# -------------------------
-# Course List & Detail
-# -------------------------
 @login_required
 def course(request):
     student = request.user.student
@@ -278,9 +248,7 @@ def course_detail(request, course_id):
     })
 
 
-# -------------------------
-# Lessons
-# -------------------------
+@login_required
 def lesson_list(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     lessons = course.lessons.all().order_by('order')
@@ -321,8 +289,8 @@ def complete_lesson(request, course_id, lesson_id):
             done = enrollment.completed_lessons.count()
             enrollment.progress = int((done / total) * 100)
             enrollment.save()
-            messages.success(request, f"✅ Lesson '{lesson.title}' marked as complete!")
+            messages.success(request, f"Lesson '{lesson.title}' marked as complete!")
         else:
-            messages.info(request, f"ℹ️ Lesson '{lesson.title}' is already completed.")
+            messages.info(request, f"Lesson '{lesson.title}' is already completed.")
 
         return redirect("course_detail", course_id=course_id)

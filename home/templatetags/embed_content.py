@@ -6,20 +6,13 @@ register = template.Library()
 
 @register.filter
 def youtube_embed(url):
-    """
-    Convert YouTube URL into embeddable iframe.
-    Supports:
-    - https://www.youtube.com/watch?v=VIDEO_ID
-    - https://youtu.be/VIDEO_ID
-    """
+    
     video_id = None
 
-    # long URL
     match = re.search(r'v=([a-zA-Z0-9_-]{11})', url)
     if match:
         video_id = match.group(1)
     else:
-        # short URL
         match = re.search(r'youtu\.be/([a-zA-Z0-9_-]{11})', url)
         if match:
             video_id = match.group(1)
