@@ -8,8 +8,6 @@ from django.contrib.auth.models import User
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.decorators import login_required
-# import re
-# from django import template
 from .filters import CourseFilter
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
@@ -17,7 +15,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.utils.encoding import force_str  # Add at top
+from django.utils.encoding import force_str  
 
 
 # -------------------------
@@ -328,16 +326,3 @@ def complete_lesson(request, course_id, lesson_id):
             messages.info(request, f"ℹ️ Lesson '{lesson.title}' is already completed.")
 
         return redirect("course_detail", course_id=course_id)
-
-
-# # -------------------------
-# # # Custom YouTube Embed Filter
-# # -------------------------
-# register = template.Library()
-
-# @register.filter
-# def youtube_embed(url):
-#     match = re.search(r'(?:v=|youtu\.be/|v=)([\w-]{11})', url)
-#     if match:
-#         return f'https://www.youtube.com/embed/{match.group(1)}'
-#     return url

@@ -5,13 +5,11 @@
 
 {% block content %}
 <div class="container mt-5">
-    <!-- Welcome Section -->
     <div class="text-center mb-5">
         <h1 class="fw-bold">Welcome back, <span class="text-primary">{{ student.user.last_name|default:student.user.username }}</span></h1>
         <p class="lead text-muted">Keep learning and growing every day.</p>
     </div>
 
-    <!-- Toast Notifications -->
     <div aria-live="polite" aria-atomic="true" class="position-relative">
         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
             {% if messages %}
@@ -27,7 +25,6 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
     <div class="row g-4 mb-5 text-center">
         <div class="col-md-4">
             <div class="card shadow-sm h-100 border-0">
@@ -58,7 +55,6 @@
         </div>
     </div>
 
-    <!-- Enrolled Courses with Progress -->
     <h3 class="fw-bold mb-4">Enrolled Courses Progress</h3>
     <div class="row g-4 mb-5">
         {% for enrollment in enrollments %}
@@ -95,7 +91,6 @@
         {% endfor %}
     </div>
 
-    <!-- Top Available Courses -->
     <h3 class="fw-bold mb-4"><span style="color: rgb(255, 93, 93);">&nbsp;&nbsp;Top</span> Available Courses</h3>
     <div class="row g-4 mb-5">
         {% for course in all_courses|slice:":3" %}

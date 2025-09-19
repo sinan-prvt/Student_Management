@@ -1,4 +1,3 @@
-# templatetags/embed_content.py
 from django import template
 from django.utils.safestring import mark_safe
 import re

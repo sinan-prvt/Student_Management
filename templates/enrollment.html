@@ -5,8 +5,13 @@
 
 {% block content %}
 <div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h1 class="fw-bold">Available Courses for Enrollment</h1>
+            <p class="text-muted">Browse and enroll in courses that interest you.</p>
+        </div>
+    </div>
 
-    <!-- Search & Filter Form -->
     <div class="row mb-4">
         <div class="col">
             <form method="get" class="row g-2">
@@ -37,7 +42,7 @@
         </div>
     </div>
 
-    <!-- Courses List -->
+
     <div class="row g-4">
         {% if all_courses %}
             {% for course in all_courses %}
@@ -82,7 +87,6 @@
         {% endif %}
     </div>
 
-    <!-- Pagination -->
     {% if page_obj.has_other_pages %}
         <nav class="mt-4">
             <ul class="pagination justify-content-center">

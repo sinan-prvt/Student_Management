@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Student
-from .models import Lesson
 
 class StudentSignupForm(forms.ModelForm):
     username = forms.CharField(
@@ -68,7 +67,3 @@ class StudentProfileUpdateForm(forms.ModelForm):
             'profile_pic': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
-# class LessonForm(forms.ModelForm):
-#     class Meta:
-#         model = Lesson
-#         fields = ['title', 'video_url', 'pdf_file', 'lesson_type', 'course']
