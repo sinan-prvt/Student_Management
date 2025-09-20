@@ -35,7 +35,7 @@
 </div>
     <div class="mb-4">
         {% if lesson in completed_lessons %}
-            <button class="btn btn-success" disabled>✅ Completed</button>
+            <button class="btn btn-success" disabled>Completed</button>
         {% else %}
             <form method="POST" action="{% url 'complete_lesson' course.id lesson.id %}">
                 {% csrf_token %}

@@ -278,7 +278,7 @@ def lesson_detail(request, course_id, lesson_id):
 
 
 @login_required
-def complete_lesson(request, course_id, lesson_id):
+def complete_lesson(request, course_id, lesson_id): 
     if request.method == "POST":
         enrollment = get_object_or_404(Enrollment, student=request.user.student, course_id=course_id)
         lesson = get_object_or_404(Lesson, id=lesson_id, course_id=course_id)
