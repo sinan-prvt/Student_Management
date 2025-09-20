@@ -16,6 +16,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.utils.encoding import force_str  
+from django.http import Http404
 
 
 
@@ -58,7 +59,7 @@ def student_signup(request):
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
-        user = get_object_or_404(User, pk=uid)
+        user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
@@ -101,8 +102,12 @@ def student_logout(request):
 
 @login_required
 def user_detail(request, pk):
-    student = get_object_or_404(Student, pk=pk)
-
+    try:
+        student = request.user.student
+    except Student.DoesNotExist:
+        messages.error(request, "Student not found")
+        return redirect('enrollment')
+    
     if request.user != student.user:
         messages.error(request, "You are not allowed to edit this profile.")
         return redirect("dashboard")
@@ -173,7 +178,10 @@ def user_dashboard(request):
 
 @login_required
 def enrollments_page(request):
-    student = get_object_or_404(Student, user=request.user)
+    student = Student.objects.filter(user=request.user).first()
+    if not student:
+        messages.error(request, "Student not found")
+        return redirect('enrollment')
     all_courses_qs = Course.objects.all()
 
     course_filter = CourseFilter(request.GET, queryset=all_courses_qs)
@@ -198,23 +206,36 @@ def enrollments_page(request):
 
 @login_required
 def enroll_course(request, course_id):
-    student = get_object_or_404(Student, user=request.user)
-    course = get_object_or_404(Course, id=course_id)
+    student = Student.objects.filter(user=request.user).first()
+    if not student:
+        messages.error(request, "Student not Found")
+        return redirect('enrollment')
     
-    enrollment, created = Enrollment.objects.get_or_create(student=student, course=course)
+    try:
+        course = Course.objects.get(id=course_id)
+    except Course.DoesNotExist:
+        raise Http404("Course not found")
     
-    if created:
-        messages.success(request, f"You have successfully enrolled in '{course.title}'!")
-    else:
+    enrollment = Enrollment.objects.filter(student=student, course=course).first()
+    
+    if enrollment:
         messages.info(request, f"You are already enrolled in '{course.title}'.")
-    
+    else:
+        Enrollment.objects.create(student=student, course=course)
+        messages.success(request, f"You have successfully enrolled in '{course.title}'!")
+
     return redirect('enrollments_page')
+    
 
 
 @login_required
 def unenroll_course(request, course_id):
     if request.method == "POST" and request.user.is_authenticated:
-        course = get_object_or_404(Course, id=course_id)
+        course = Course.objects.filter(id=course_id).first()
+        if not course:
+            messages.error(request, "Course not found")
+            return redirect('lesson_list')
+        
         Enrollment.objects.filter(student=request.user.student, course=course).delete()
     return redirect("enrollments_page") 
 
@@ -235,10 +256,18 @@ def course(request):
 
 @login_required
 def course_detail(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+    course = Course.objects.filter(id=course_id).first()
+    if not course:
+        messages.error(request, "Course not found")
+        return redirect('lesson_list')
+    
     lessons = course.lessons.all().order_by('order')
     student = request.user.student
-    enrollment = get_object_or_404(Enrollment, student=student, course=course)
+
+    enrollment = Enrollment.objects.filter(student=student, course=course).first()
+    if not enrollment:
+        messages.error(request, "Enrollment not found")
+        return redirect('lesson_details')
     completed_lessons = enrollment.completed_lessons.all()
 
     return render(request, 'lesson_list.html', {
@@ -250,17 +279,31 @@ def course_detail(request, course_id):
 
 @login_required
 def lesson_list(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
+    course = Course.objects.filter(id=course_id).first()
+    if not course:
+        messages.error(request, "Courses not found")
+        return redirect('lesson_list')
     lessons = course.lessons.all().order_by('order')
     return render(request, 'lesson_list.html', {'course': course, 'lessons': lessons})
 
 
 @login_required
 def lesson_detail(request, course_id, lesson_id):
-    course = get_object_or_404(Course, id=course_id)
-    lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
+    course = Course.objects.filter(id=course_id).first()
+    if not course:
+        messages.error(request, "Course not found")
+        return redirect('lesson_list')
+    
+    lesson = Lesson.objects.filter(id=lesson_id, course=course).first()
+    if not lesson:
+        messages.error(request, "Lesson not found")
+        return redirect('lesson_detail')
 
-    enrollment = get_object_or_404(Enrollment, student=request.user.student, course=course)
+    enrollment = Enrollment.objects.filter(student=request.user.student, course=course).first()
+    if not enrollment:
+        messages.error(request, "Enrollment not found")
+        return redirect('lesson_details')
+    
     completed_lessons = enrollment.completed_lessons.all()
 
     lessons = list(course.lessons.order_by('order'))
@@ -280,8 +323,17 @@ def lesson_detail(request, course_id, lesson_id):
 @login_required
 def complete_lesson(request, course_id, lesson_id): 
     if request.method == "POST":
-        enrollment = get_object_or_404(Enrollment, student=request.user.student, course_id=course_id)
-        lesson = get_object_or_404(Lesson, id=lesson_id, course_id=course_id)
+        enrollment = Enrollment.objects.filter(
+            student=request.user.student, course_id=course_id
+        ).first()
+        if not enrollment:
+            messages.error(request, "Enrollment not found")
+            return redirect('lesson_list')
+        
+        lesson = Lesson.objects.filter(id=lesson_id, course_id=course_id).first()
+        if not lesson:
+            messages.error(request, "Lesson not found")
+            return redirect('lesson_detil', course_id=course_id)
 
         if lesson not in enrollment.completed_lessons.all():
             enrollment.completed_lessons.add(lesson)
