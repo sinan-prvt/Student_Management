@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login as auth_login, logout
@@ -139,7 +139,7 @@ def user_detail(request, pk):
         "enrollments": enrollments
     })
 
-
+    
 def index(request):
     return render(request, 'index.html')
 
