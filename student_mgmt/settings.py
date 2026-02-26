@@ -4,11 +4,12 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-1omitq^(n-xm5ek==l^sw^$^k!khxr_n6p#d_58x8(hv73a2e#')
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*'] # For simplicity in deployment, can be narrowed later
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 INSTALLED_APPS = [
@@ -58,8 +59,7 @@ WSGI_APPLICATION = 'student_mgmt.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgres://postgres:9400@localhost:5432/student_db',
-        conn_max_age=600
+        default='postgresql://postgres:9400@localhost:5432/student_db'
     )
 }
 
@@ -108,5 +108,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'skilloriaa@gmail.com'  
-EMAIL_HOST_PASSWORD = 'yhqzldrevfgmtuli'  
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'skilloriaa@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'yhqzldrevfgmtuli')
+
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
