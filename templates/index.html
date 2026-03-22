@@ -1,148 +1,525 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini LMS</title>
+    <title>Skilloria - AI Powered Learning</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700;900&display=swap"
+        rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            scroll-behavior: smooth;
+        :root {
+            --bg-base: #030305;
+            --surface: rgba(15, 15, 20, 0.6);
+            --border-light: rgba(255, 255, 255, 0.05);
+            --border-hover: rgba(168, 85, 247, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --accent-1: #c026d3;
+            /* Fuchsia */
+            --accent-2: #3b82f6;
+            /* Blue */
+            --accent-3: #8b5cf6;
+            /* Violet */
         }
 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.1), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(192, 38, 211, 0.1), transparent 25%);
+            background-attachment: fixed;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        .navbar-brand {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Glassmorphism Navbar */
+        .navbar-glass {
+            background: rgba(3, 3, 5, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            color: #fff !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand i {
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-link {
+            color: var(--text-secondary) !important;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #fff !important;
+        }
+
+        /* Glowing Orbs Background */
+        .orb-1,
+        .orb-2 {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 10s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-3);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-1);
+            bottom: 20%;
+            right: -50px;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                transform: translateY(30px) scale(1.1);
+            }
+        }
+
+        /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: #fff;
-            padding: 80px 0;
+            position: relative;
+            padding: 180px 0 120px;
             text-align: center;
+            z-index: 1;
         }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: #e4e4e7;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-badge span {
+            color: var(--accent-1);
+            font-weight: 600;
+        }
+
         .hero h1 {
-            font-weight: 800;
+            font-weight: 900;
+            font-size: 4.5rem;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 1.5rem;
         }
+
+        .text-gradient {
+            background: linear-gradient(to right, #fff 20%, var(--accent-3) 50%, var(--accent-2) 80%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 5s linear infinite;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
         .hero p {
             font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.6;
         }
-        .hero .btn-primary {
-            padding: 0.8rem 2rem;
-            font-size: 1.1rem;
+
+        /* AI Button */
+        .btn-ai {
+            position: relative;
+            background: linear-gradient(to right, var(--accent-1), var(--accent-3));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-ai::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+            transform: skewX(-20deg) translateX(-150%);
+            transition: transform 0.5s ease;
+        }
+
+        .btn-ai:hover::before {
+            transform: skewX(-20deg) translateX(150%);
+        }
+
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(192, 38, 211, 0.6);
+            color: white;
+        }
+
+        /* Courses Section */
+        .courses-section {
+            padding: 80px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 3.5rem;
+            text-align: center;
         }
 
         .course-card {
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-left: 5px solid #2575fc;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-        .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-        .course-icon {
-            font-size: 2.5rem;
-            color: #2575fc;
-            margin-bottom: 15px;
-        }
-        .badge-category {
-            float: right;
-            font-size: 0.75rem;
-            padding: 0.3rem 0.6rem;
-            border-radius: 0.25rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        footer {
-            background: #1a1a1a;
-            color: #ccc;
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-1), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
         }
-        footer a {
-            color: #ccc;
-            margin: 0 10px;
-            transition: color 0.2s;
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.15);
         }
-        footer a:hover {
+
+        .course-card:hover::before {
+            opacity: 1;
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             color: #fff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .course-card:hover .icon-box {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .card-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .btn-outline-glass {
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn-outline-glass:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border-light);
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            margin: 0 0.75rem;
+            font-size: 1.2rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--accent-1);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 991px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.8rem;
+                letter-spacing: -1px;
+            }
+
+            .hero {
+                padding: 130px 15px 60px;
+            }
+
+            .orb-1 {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .orb-2 {
+                width: 200px;
+                height: 200px;
+                bottom: 10%;
+            }
+
+            .section-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+            
+            .courses-section {
+                padding: 60px 0;
+            }
+
+            .course-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .btn-ai {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.95rem;
+                width: 100%;
+            }
+
+            .hero-badge {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.8rem;
+            }
         }
     </style>
 </head>
-<body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+<body>
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+
+    <nav class="navbar navbar-expand-lg fixed-top navbar-glass">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">Skilloria</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-bolt"></i> Skilloria</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                style="border-color: rgba(255,255,255,0.1);">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{% url 'signup' %}">Sign Up</a>
+                        <a class="nav-link px-3" href="{% url 'signup' %}">Sign Up</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link px-3" href="{% url 'login' %}">Login</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100; margin-top: 80px;">
         {% if messages %}
-            {% for message in messages %}
-                <div class="toast align-items-center text-bg-{{ message.tags }} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="2000">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            {{ message }}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                    </div>
+        {% for message in messages %}
+        <div class="toast align-items-center text-white border-0 mb-2" role="alert" aria-live="assertive"
+            aria-atomic="true" data-bs-delay="4000"
+            style="background: rgba(15,15,20,0.9); border: 1px solid rgba(255,255,255,0.1)!important; backdrop-filter: blur(10px);">
+            <div class="d-flex">
+                <div class="toast-body">
+                    {{ message }}
                 </div>
-            {% endfor %}
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+        {% endfor %}
         {% endif %}
     </div>
 
     <section class="hero">
         <div class="container">
-            <h1 class="display-4">Learn, Grow, Succeed</h1>
-            <p class="lead">Unlock your potential with our top-notch courses and expert guidance.</p>
-            <a href="{% url 'login' %}" class="btn btn-primary btn-lg mt-3">Get Started</a>
+            <div class="hero-badge">
+                ✨ Next-Gen Learning Platform v2.0
+            </div>
+            <h1>Learn. <span class="text-gradient">Adapt.</span> Succeed.</h1>
+            <p>Accelerate your career with AI-curated curriculum and deep, immersive practical experiences. Step into
+                the future.</p>
+            <a href="{% url 'login' %}" class="text-decoration-none">
+                <button class="btn-ai">Initialize Career <i class="fa-solid fa-arrow-right ms-2 fs-6"></i></button>
+            </a>
         </div>
     </section>
 
-    <section class="py-5 bg-light">
+    <section class="courses-section">
         <div class="container">
-            <h2 class="mb-5 fw-bold text-center">Available Courses</h2>
+            <h2 class="section-title">Core <span class="text-gradient"
+                    style="background: linear-gradient(to right, var(--accent-1), var(--accent-2)); -webkit-background-clip: text; background-clip: text;">Modules</span>
+            </h2>
             <div class="row g-4">
 
-                <div class="col-md-4 d-flex">
-                    <div class="card course-card p-4 shadow-sm w-100">
-                        <i class="fa-solid fa-code course-icon"></i>
-                        <span class="badge bg-success badge-category">Beginner</span>
-                        <h5 class="card-title mt-2">Python for Beginners</h5>
-                        <p class="card-text">Learn the fundamentals of Python programming with hands-on exercises.</p>
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary w-100 mt-auto"><i class="fa-solid fa-graduation-cap me-2"></i>Enroll Now</a>
+                <div class="col-lg-4 col-md-6">
+                    <div class="course-card">
+                        <div class="icon-box">
+                            <i class="fa-brands fa-python"></i>
+                        </div>
+                        <h5 class="card-title">Neural Networks & Python</h5>
+                        <p class="card-text">Establish your foundation. Master Python syntax and step into the world of
+                            AI algorithms and dataset manipulation.</p>
+                        <a href="{% url 'login' %}" class="text-decoration-none">
+                            <div class="btn-outline-glass">
+                                Access Module
+                            </div>
+                        </a>
                     </div>
                 </div>
 
-                <div class="col-md-4 d-flex">
-                    <div class="card course-card p-4 shadow-sm w-100">
-                        <i class="fa-solid fa-chart-simple course-icon"></i>
-                        <span class="badge bg-warning text-dark badge-category">Intermediate</span>
-                        <h5 class="card-title mt-2">Data Science with Python</h5>
-                        <p class="card-text">Master data analysis, visualization, and basic machine learning concepts.</p>
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary w-100 mt-auto"><i class="fa-solid fa-chart-line me-2"></i>Enroll Now</a>
+                <div class="col-lg-4 col-md-6">
+                    <div class="course-card">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-network-wired"></i>
+                        </div>
+                        <h5 class="card-title">Data Architecture</h5>
+                        <p class="card-text">Learn how to route, query, and scale massive datasets using cutting-edge
+                            warehousing tools and predictive models.</p>
+                        <a href="{% url 'login' %}" class="text-decoration-none">
+                            <div class="btn-outline-glass">
+                                Access Module
+                            </div>
+                        </a>
                     </div>
                 </div>
 
-                <div class="col-md-4 d-flex">
-                    <div class="card course-card p-4 shadow-sm w-100">
-                        <i class="fa-brands fa-react course-icon"></i>
-                        <span class="badge bg-danger badge-category">Advanced</span>
-                        <h5 class="card-title mt-2">Advanced React Development</h5>
-                        <p class="card-text">Build complex, high-performance web applications using React and modern tools.</p>
-                        <a href="{% url 'login' %}" class="btn btn-outline-primary w-100 mt-auto"><i class="fa-brands fa-react me-2"></i>Enroll Now</a>
+                <div class="col-lg-4 col-md-6">
+                    <div class="course-card">
+                        <div class="icon-box">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <h5 class="card-title">Frontend Systems</h5>
+                        <p class="card-text">Engineer hyper-optimized React interfaces. Build the client side of robust,
+                            low-latency, and beautiful web applications.</p>
+                        <a href="{% url 'login' %}" class="text-decoration-none">
+                            <div class="btn-outline-glass">
+                                Access Module
+                            </div>
+                        </a>
                     </div>
                 </div>
 
@@ -150,15 +527,14 @@
         </div>
     </section>
 
-    <footer class="py-5">
-        <div class="container text-center">
-            <p>&copy; 2025 Skilloria. All rights reserved.</p>
-            <div class="mt-3">
-                <a href="#"><i class="fab fa-facebook-f fa-lg"></i></a>
-                <a href="#"><i class="fab fa-twitter fa-lg"></i></a>
-                <a href="#"><i class="fab fa-linkedin-in fa-lg"></i></a>
-                <a href="#"><i class="fab fa-instagram fa-lg"></i></a>
+    <footer>
+        <div class="container">
+            <div class="social-links mb-4">
+                <a href="#"><i class="fa-brands fa-discord"></i></a>
+                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-github"></i></a>
             </div>
+            <p>&copy; 2025 Skilloria AI Ecosystem.</p>
         </div>
     </footer>
 
@@ -166,10 +542,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-            toastElList.map(function(toastEl) {
+            toastElList.map(function (toastEl) {
                 return new bootstrap.Toast(toastEl).show()
             })
         });
     </script>
 </body>
+
 </html>
