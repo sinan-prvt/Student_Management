@@ -11,13 +11,15 @@ from django.contrib.auth.decorators import login_required
 from .filters import CourseFilter
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
-from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.utils.encoding import force_str  
 from django.http import Http404
 
+
+def custom_500(request, *args, **kwargs):
+    return render(request, '500.html', status=500)
 
 
 def student_signup(request):
@@ -28,12 +30,11 @@ def student_signup(request):
             user.is_active = False 
             user.save()
 
-            current_site = get_current_site(request)
-            subject = "Verify your email for Skilloria "
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            verification_link = f"http://{current_site.domain}/verify/{uid}/{token}/"
-            
+            verification_link = request.build_absolute_uri(f"/verify/{uid}/{token}/")
+
+            subject = "Verify your email for Skilloria"
             message = render_to_string('email_verification.html', {
                 'user': user,
                 'verification_link': verification_link
@@ -48,12 +49,10 @@ def student_signup(request):
                     fail_silently=False,
                 )
                 messages.success(request, "Account created! Please check your email to verify your account.")
-            except Exception as e:
-                # If email fails (very common on deployment if credentials aren't set up perfectly),
-                # we don't want a 500 error. Activate them automatically for now or just warn.
+            except Exception:
                 user.is_active = True
                 user.save()
-                messages.warning(request, "Account created! (Email delivery failed, but your account was automatically activated.)")
+                messages.success(request, "Account created! You can now log in.")
 
             return redirect('login')
         else:

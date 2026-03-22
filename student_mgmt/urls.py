@@ -5,3 +5,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),
 ]
+
+handler500 = 'home.views.custom_500'
