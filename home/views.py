@@ -39,15 +39,22 @@ def student_signup(request):
                 'verification_link': verification_link
             })
 
-            send_mail(
-                subject,
-                message,
-                'no-reply@yourdomain.com',
-                [user.email],
-                fail_silently=False,
-            )
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    'no-reply@yourdomain.com',
+                    [user.email],
+                    fail_silently=False,
+                )
+                messages.success(request, "Account created! Please check your email to verify your account.")
+            except Exception as e:
+                # If email fails (very common on deployment if credentials aren't set up perfectly),
+                # we don't want a 500 error. Activate them automatically for now or just warn.
+                user.is_active = True
+                user.save()
+                messages.warning(request, "Account created! (Email delivery failed, but your account was automatically activated.)")
 
-            messages.success(request, "Account created! Please check your email to verify your account.")
             return redirect('login')
         else:
             messages.error(request, "Please correct the errors below.")

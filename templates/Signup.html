@@ -19,6 +19,13 @@
             --accent-3: #8b5cf6;
         }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-base);
@@ -27,9 +34,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
-            overflow-x: hidden;
+            padding: 40px 15px;
             position: relative;
+        }
+
+        /* Background Wrapper */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* Glowing Orbs */
@@ -37,7 +55,6 @@
             position: absolute;
             border-radius: 50%;
             filter: blur(100px);
-            z-index: -1;
             opacity: 0.4;
             animation: float 10s ease-in-out infinite alternate;
         }
@@ -64,6 +81,12 @@
             transition: all 0.4s ease;
             position: relative;
             z-index: 1;
+        }
+
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 30px 20px;
+            }
         }
 
         .glass-card::before {
@@ -125,6 +148,7 @@
             background: rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             color: var(--text-secondary);
+            margin-bottom: 0;
         }
 
         .file-upload-label:hover {
@@ -167,8 +191,10 @@
     </style>
 </head>
 <body>
-    <div class="orb-1"></div>
-    <div class="orb-2"></div>
+    <div class="bg-orbs">
+        <div class="orb-1"></div>
+        <div class="orb-2"></div>
+    </div>
 
     <div class="glass-card">
         <h2>Establish Account</h2>
@@ -195,19 +221,19 @@
             <div class="form-group position-relative mb-3">
                 <span class="input-icon"><i class="fas fa-user"></i></span>
                 {{ form.username }}
-                {{ form.username.errors }}
+                <div class="text-danger small mt-1">{{ form.username.errors }}</div>
             </div>
 
             <div class="form-group position-relative mb-3">
                 <span class="input-icon"><i class="fas fa-envelope"></i></span>
                 {{ form.email }}
-                {{ form.email.errors }}
+                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
             </div>
 
             <div class="form-group position-relative mb-3">
                 <span class="input-icon"><i class="fas fa-lock"></i></span>
                 {{ form.password }}
-                {{ form.password.errors }}
+                <div class="text-danger small mt-1">{{ form.password.errors }}</div>
             </div>
 
             <div class="file-upload-wrapper mb-3">
@@ -216,13 +242,13 @@
                     <div>Upload Identity Image</div>
                     {{ form.profile_pic }}
                 </label>
-                {{ form.profile_pic.errors }}
+                <div class="text-danger small mt-1">{{ form.profile_pic.errors }}</div>
             </div>
 
             <div class="form-group position-relative mb-4">
                 <span class="input-icon"><i class="fas fa-user-edit"></i></span>
                 {{ form.bio }}
-                {{ form.bio.errors }}
+                <div class="text-danger small mt-1">{{ form.bio.errors }}</div>
             </div>
 
             <button type="submit" class="btn-ai">Register Sequence</button>
@@ -244,7 +270,7 @@
                 return new bootstrap.Toast(toastEl, { autohide: true }).show();
             });
             // Ensure inputs have form-control class
-            document.querySelectorAll('input, text-area').forEach(input => {
+            document.querySelectorAll('input, textarea').forEach(input => {
                 if(input.type !== 'file' && input.type !== 'hidden') {
                     input.classList.add('form-control');
                 }

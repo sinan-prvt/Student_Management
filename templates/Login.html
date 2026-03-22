@@ -19,6 +19,13 @@
             --accent-3: #8b5cf6;
         }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-base);
@@ -27,9 +34,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            overflow: hidden;
+            padding: 20px 15px;
             position: relative;
+        }
+
+        /* Background Wrapper */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* Glowing Orbs */
@@ -37,7 +55,6 @@
             position: absolute;
             border-radius: 50%;
             filter: blur(100px);
-            z-index: -1;
             opacity: 0.4;
             animation: float 10s ease-in-out infinite alternate;
         }
@@ -65,6 +82,12 @@
             transition: all 0.4s ease;
             position: relative;
             z-index: 1;
+        }
+
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 30px 20px;
+            }
         }
 
         .glass-card::before {
@@ -156,8 +179,10 @@
     </style>
 </head>
 <body>
-    <div class="orb-1"></div>
-    <div class="orb-2"></div>
+    <div class="bg-orbs">
+        <div class="orb-1"></div>
+        <div class="orb-2"></div>
+    </div>
 
     <div class="glass-card">
         <div class="login-avatar">

@@ -28,11 +28,17 @@
             /* Violet */
         }
 
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-base);
             color: var(--text-primary);
-            overflow-x: hidden;
             background-image:
                 radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.1), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(192, 38, 211, 0.1), transparent 25%);
@@ -86,12 +92,22 @@
         }
 
         /* Glowing Orbs Background */
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
         .orb-1,
         .orb-2 {
             position: absolute;
             border-radius: 50%;
             filter: blur(100px);
-            z-index: -1;
             opacity: 0.4;
             animation: float 10s ease-in-out infinite alternate;
         }
@@ -192,6 +208,9 @@
             border-radius: 8px;
             cursor: pointer;
             overflow: hidden;
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
             font-family: 'Space Grotesk', sans-serif;
@@ -317,6 +336,8 @@
             transition: all 0.3s ease;
             text-align: center;
             width: 100%;
+            display: block;
+            text-decoration: none;
         }
 
         .btn-outline-glass:hover {
@@ -412,8 +433,10 @@
 </head>
 
 <body>
-    <div class="orb-1"></div>
-    <div class="orb-2"></div>
+    <div class="bg-orbs">
+        <div class="orb-1"></div>
+        <div class="orb-2"></div>
+    </div>
 
     <nav class="navbar navbar-expand-lg fixed-top navbar-glass">
         <div class="container">
@@ -462,8 +485,8 @@
             <h1>Learn. <span class="text-gradient">Adapt.</span> Succeed.</h1>
             <p>Accelerate your career with AI-curated curriculum and deep, immersive practical experiences. Step into
                 the future.</p>
-            <a href="{% url 'login' %}" class="text-decoration-none">
-                <button class="btn-ai">Initialize Career <i class="fa-solid fa-arrow-right ms-2 fs-6"></i></button>
+            <a href="{% url 'login' %}" class="btn-ai">
+                Initialize Career <i class="fa-solid fa-arrow-right ms-2 fs-6"></i>
             </a>
         </div>
     </section>
@@ -483,10 +506,8 @@
                         <h5 class="card-title">Neural Networks & Python</h5>
                         <p class="card-text">Establish your foundation. Master Python syntax and step into the world of
                             AI algorithms and dataset manipulation.</p>
-                        <a href="{% url 'login' %}" class="text-decoration-none">
-                            <div class="btn-outline-glass">
-                                Access Module
-                            </div>
+                        <a href="{% url 'login' %}" class="btn-outline-glass">
+                            Access Module
                         </a>
                     </div>
                 </div>
@@ -499,10 +520,8 @@
                         <h5 class="card-title">Data Architecture</h5>
                         <p class="card-text">Learn how to route, query, and scale massive datasets using cutting-edge
                             warehousing tools and predictive models.</p>
-                        <a href="{% url 'login' %}" class="text-decoration-none">
-                            <div class="btn-outline-glass">
-                                Access Module
-                            </div>
+                        <a href="{% url 'login' %}" class="btn-outline-glass">
+                            Access Module
                         </a>
                     </div>
                 </div>
@@ -515,10 +534,8 @@
                         <h5 class="card-title">Frontend Systems</h5>
                         <p class="card-text">Engineer hyper-optimized React interfaces. Build the client side of robust,
                             low-latency, and beautiful web applications.</p>
-                        <a href="{% url 'login' %}" class="text-decoration-none">
-                            <div class="btn-outline-glass">
-                                Access Module
-                            </div>
+                        <a href="{% url 'login' %}" class="btn-outline-glass">
+                            Access Module
                         </a>
                     </div>
                 </div>
